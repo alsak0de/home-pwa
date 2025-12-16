@@ -89,16 +89,8 @@ export function App() {
     if (!base) {
       return;
     }
-    let origin = '';
-    try {
-      origin = new URL(base).origin;
-    } catch {
-      origin = '';
-    }
-    const redirectUrl = encodeURIComponent(`${base}${statusPath}`);
-    const loginUrl = `${origin}/cdn-cgi/access/login?redirect_url=${redirectUrl}`;
-    // Navigate in the same tab to avoid popup blockers in local dev
-    window.location.href = loginUrl;
+    // Navigate directly to the protected resource; Access will 302 to the team login UI.
+    window.location.href = `${base}${statusPath}`;
   }, [apiBase, statusPath]);
 
   const handleAction = useCallback(
