@@ -1,4 +1,5 @@
 import type { ActionRequest, ActionResponse, StatusResponse } from '../types';
+import { DEBUG_ENABLED, debugLog } from '../utils/debug';
 
 const API_BASE: string = (import.meta.env.VITE_API_BASE_URL as string) || '';
 const STATUS_PATH: string = (import.meta.env.VITE_STATUS_PATH as string) || '/v1/status';
@@ -41,11 +42,18 @@ function makeAbortSignal(timeoutMs: number): AbortSignal {
   return controller.signal;
 }
 
+// Log effective config once
+if (DEBUG_ENABLED) {
+  debugLog('API config', { API_BASE, STATUS_PATH, ACTION_PATH });
+}
+
 export async function getStatus(): Promise<StatusResponse> {
   const url = buildUrl(STATUS_PATH);
   const doFetch = async (): Promise<StatusResponse> => {
     const signal = makeAbortSignal(9000);
+    DEBUG_ENABLED && debugLog('GET', url);
     const res = await fetch(url, { credentials: 'include', signal });
+    DEBUG_ENABLED && debugLog('GET response', { url: res.url, status: res.status, contentType: res.headers.get('content-type') });
     if (res.status === 401 || res.status === 403 || isLikelyHtml(res.headers.get('content-type'))) {
       throw new ApiError('Unauthenticated', { unauthenticated: true, statusCode: res.status });
     }
@@ -58,12 +66,15 @@ export async function getStatus(): Promise<StatusResponse> {
   try {
     return await doFetch();
   } catch (err) {
+    DEBUG_ENABLED && debugLog('GET error', err);
     // Retry once on network failure only
     if (err instanceof DOMException || (err as Error)?.name === 'AbortError') {
+      DEBUG_ENABLED && debugLog('GET retry after abort');
       return await doFetch();
     }
     if (err instanceof TypeError) {
       // Fetch network error
+      DEBUG_ENABLED && debugLog('GET retry after network error');
       return await doFetch();
     }
     throw err;
@@ -73,6 +84,7 @@ export async function getStatus(): Promise<StatusResponse> {
 export async function postAction(req: ActionRequest): Promise<ActionResponse> {
   const url = buildUrl(ACTION_PATH);
   const signal = makeAbortSignal(9000);
+  DEBUG_ENABLED && debugLog('POST', url, req);
   const res = await fetch(url, {
     method: 'POST',
     credentials: 'include',
@@ -81,6 +93,7 @@ export async function postAction(req: ActionRequest): Promise<ActionResponse> {
     body: JSON.stringify(req)
   });
 
+  DEBUG_ENABLED && debugLog('POST response', { url: res.url, status: res.status, contentType: res.headers.get('content-type') });
   if (res.status === 401 || res.status === 403 || isLikelyHtml(res.headers.get('content-type'))) {
     throw new ApiError('Unauthenticated', { unauthenticated: true, statusCode: res.status });
   }

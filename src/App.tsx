@@ -4,6 +4,7 @@ import { TopBar } from './components/TopBar';
 import { ApiError, getStatus, postAction } from './api/api';
 import type { ActionRequest, StatusResponse, Targets } from './types';
 import { Car, DoorClosed, DoorOpen, Lock as LockIcon, Shield, ShieldOff, Unlock } from 'lucide-react';
+import { DEBUG_ENABLED, debugLog } from './utils/debug';
 
 type AppState = {
   loading: boolean;
@@ -58,22 +59,28 @@ export function App() {
   const apiBase: string = (import.meta.env.VITE_API_BASE_URL as string) || '';
   const hasApiBase = apiBase.trim().length > 0;
   const statusPath: string = (import.meta.env.VITE_STATUS_PATH as string) || '/v1/status';
+  const actionPath: string = (import.meta.env.VITE_ACTION_PATH as string) || '/v1/action';
 
   const load = useCallback(async () => {
+    DEBUG_ENABLED && debugLog('LOAD_START');
     dispatch({ type: 'LOAD_START' });
     try {
       const s = await getStatus();
+      DEBUG_ENABLED && debugLog('LOAD_SUCCESS', s);
       dispatch({ type: 'LOAD_SUCCESS', status: s });
     } catch (e) {
       if (e instanceof ApiError && e.unauthenticated) {
+        DEBUG_ENABLED && debugLog('LOAD_UNAUTH');
         dispatch({ type: 'LOAD_UNAUTH' });
       } else {
         // Network/CORS errors appear as TypeError and won't include auth signals.
         // Show the sign-in UI to allow Access login, then user can Retry.
         dispatch({ type: 'LOAD_ERROR' });
         if (hasApiBase) {
+          DEBUG_ENABLED && debugLog('LOAD_ERROR → show unauthenticated gate (likely CORS/network)');
           dispatch({ type: 'LOAD_UNAUTH' });
         } else {
+          DEBUG_ENABLED && debugLog('LOAD_ERROR → no API base configured');
           dispatch({ type: 'TOAST', message: 'Failed to load status', kind: 'error' });
         }
       }
@@ -81,39 +88,48 @@ export function App() {
   }, []);
 
   useEffect(() => {
+    DEBUG_ENABLED && debugLog('App mount', { apiBase, statusPath, actionPath });
     void load();
   }, [load]);
 
   const handleSignIn = useCallback(() => {
     const base = apiBase.replace(/\/+$/, '');
     if (!base) {
+      DEBUG_ENABLED && debugLog('handleSignIn: missing api base');
       return;
     }
     // Navigate directly to the protected resource; Access will 302 to the team login UI.
+    DEBUG_ENABLED && debugLog('handleSignIn → navigate', `${base}${statusPath}`);
     window.location.href = `${base}${statusPath}`;
   }, [apiBase, statusPath]);
 
   const handleAction = useCallback(
     async (req: ActionRequest) => {
+      DEBUG_ENABLED && debugLog('SEND_START', req);
       dispatch({ type: 'SEND_START', target: req.target });
       try {
         const res = await postAction(req);
         if (res.status) {
+          DEBUG_ENABLED && debugLog('SET_STATUS (from action response)', res.status);
           dispatch({ type: 'SET_STATUS', status: res.status });
         } else {
           // Fallback: refresh immediately
           const s = await getStatus();
+          DEBUG_ENABLED && debugLog('SET_STATUS (from refetch)', s);
           dispatch({ type: 'SET_STATUS', status: s });
         }
         dispatch({ type: 'TOAST', message: 'Done', kind: 'success' });
       } catch (e) {
         if (e instanceof ApiError && e.unauthenticated) {
+          DEBUG_ENABLED && debugLog('SEND unauthenticated');
           dispatch({ type: 'LOAD_UNAUTH' });
-          dispatch({ type: 'TOAST', message: 'You must sign in with Google', kind: 'error' });
+          dispatch({ type: 'TOAST', message: 'You must sign in', kind: 'error' });
         } else {
+          DEBUG_ENABLED && debugLog('SEND error', e);
           dispatch({ type: 'TOAST', message: 'Action failed', kind: 'error' });
         }
       } finally {
+        DEBUG_ENABLED && debugLog('SEND_END', req.target);
         dispatch({ type: 'SEND_END', target: req.target });
       }
     },

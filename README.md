@@ -60,6 +60,18 @@ npm run preview
 
 Optional: If you want to enable branch previews, ensure the environment variable is set for Preview deployments as well.
 
+## Debugging
+
+- Enable verbose console logs by any of:
+  - Add `?debug=1` to the URL (e.g., `https://panel.sagarra-novo.net/?debug=1`)
+  - In DevTools console: `localStorage.setItem('debug','1')` then reload
+  - In local dev, logs are enabled automatically
+- The app logs:
+  - Effective API config and paths
+  - Load/refresh attempts and outcomes
+  - Action requests and responses
+  - Auth gate decisions (e.g., unauthenticated vs network/CORS)
+
 ## PWA Notes (iOS-friendly)
 
 - The app includes:
