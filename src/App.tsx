@@ -74,15 +74,10 @@ export function App() {
         dispatch({ type: 'LOAD_UNAUTH' });
       } else {
         // Network/CORS errors appear as TypeError and won't include auth signals.
-        // Show the sign-in UI to allow Access login, then user can Retry.
+        // Do NOT show the sign-in UI; surface a transient error instead.
         dispatch({ type: 'LOAD_ERROR' });
-        if (hasApiBase) {
-          DEBUG_ENABLED && debugLog('LOAD_ERROR → show unauthenticated gate (likely CORS/network)');
-          dispatch({ type: 'LOAD_UNAUTH' });
-        } else {
-          DEBUG_ENABLED && debugLog('LOAD_ERROR → no API base configured');
-          dispatch({ type: 'TOAST', message: 'Failed to load status', kind: 'error' });
-        }
+        DEBUG_ENABLED && debugLog('LOAD_ERROR (network/CORS)', e);
+        dispatch({ type: 'TOAST', message: 'Failed to load status', kind: 'error' });
       }
     }
   }, []);
