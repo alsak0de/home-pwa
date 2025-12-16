@@ -1,6 +1,8 @@
 import type { ActionRequest, ActionResponse, StatusResponse } from '../types';
 
 const API_BASE: string = (import.meta.env.VITE_API_BASE_URL as string) || '';
+const STATUS_PATH: string = (import.meta.env.VITE_STATUS_PATH as string) || '/v1/status';
+const ACTION_PATH: string = (import.meta.env.VITE_ACTION_PATH as string) || '/v1/action';
 
 function buildUrl(path: string): string {
   return `${API_BASE}${path}`;
@@ -40,7 +42,7 @@ function makeAbortSignal(timeoutMs: number): AbortSignal {
 }
 
 export async function getStatus(): Promise<StatusResponse> {
-  const url = buildUrl('/v1/status');
+  const url = buildUrl(STATUS_PATH);
   const doFetch = async (): Promise<StatusResponse> => {
     const signal = makeAbortSignal(9000);
     const res = await fetch(url, { credentials: 'include', signal });
@@ -69,7 +71,7 @@ export async function getStatus(): Promise<StatusResponse> {
 }
 
 export async function postAction(req: ActionRequest): Promise<ActionResponse> {
-  const url = buildUrl('/v1/action');
+  const url = buildUrl(ACTION_PATH);
   const signal = makeAbortSignal(9000);
   const res = await fetch(url, {
     method: 'POST',

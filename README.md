@@ -16,6 +16,10 @@ Create a `.env` (or `.env.local`) at the project root:
 
 ```
 VITE_API_BASE_URL=https://api.<MY_DOMAIN>
+# If your API does not use the /v1 convention, override these:
+# For example, if both GET status and POST action are at /pwa:
+# VITE_STATUS_PATH=/pwa
+# VITE_ACTION_PATH=/pwa
 ```
 
 This is your Cloudflare Tunnel hostname that fronts Node-RED (protected by Cloudflare Access).

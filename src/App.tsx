@@ -57,6 +57,7 @@ export function App() {
   const [state, dispatch] = useReducer(reducer, initialState);
   const apiBase: string = (import.meta.env.VITE_API_BASE_URL as string) || '';
   const hasApiBase = apiBase.trim().length > 0;
+  const statusPath: string = (import.meta.env.VITE_STATUS_PATH as string) || '/v1/status';
 
   const load = useCallback(async () => {
     dispatch({ type: 'LOAD_START' });
@@ -94,11 +95,11 @@ export function App() {
     } catch {
       origin = '';
     }
-    const redirectUrl = encodeURIComponent(`${base}/v1/status`);
+    const redirectUrl = encodeURIComponent(`${base}${statusPath}`);
     const loginUrl = `${origin}/cdn-cgi/access/login?redirect_url=${redirectUrl}`;
     // Navigate in the same tab to avoid popup blockers in local dev
     window.location.href = loginUrl;
-  }, [apiBase]);
+  }, [apiBase, statusPath]);
 
   const handleAction = useCallback(
     async (req: ActionRequest) => {
