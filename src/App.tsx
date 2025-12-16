@@ -67,8 +67,14 @@ export function App() {
       if (e instanceof ApiError && e.unauthenticated) {
         dispatch({ type: 'LOAD_UNAUTH' });
       } else {
+        // Network/CORS errors appear as TypeError and won't include auth signals.
+        // Show the sign-in UI to allow Access login, then user can Retry.
         dispatch({ type: 'LOAD_ERROR' });
-        dispatch({ type: 'TOAST', message: 'Failed to load status', kind: 'error' });
+        if (hasApiBase) {
+          dispatch({ type: 'LOAD_UNAUTH' });
+        } else {
+          dispatch({ type: 'TOAST', message: 'Failed to load status', kind: 'error' });
+        }
       }
     }
   }, []);
