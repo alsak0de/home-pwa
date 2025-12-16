@@ -67,6 +67,7 @@ Optional: If you want to enable branch previews, ensure the environment variable
   - In DevTools console: `localStorage.setItem('debug','1')` then reload
   - In local dev, logs are enabled automatically
 - The app logs:
+  - Note: logs use `console.log` so they appear without enabling “Verbose”
   - Effective API config and paths
   - Load/refresh attempts and outcomes
   - Action requests and responses

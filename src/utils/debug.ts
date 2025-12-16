@@ -12,7 +12,7 @@ export const DEBUG_ENABLED: boolean = import.meta.env.DEV || queryHasDebug || lo
 export function debugLog(...args: unknown[]) {
   if (DEBUG_ENABLED) {
     // eslint-disable-next-line no-console
-    console.debug('[home-pwa]', ...args);
+    console.log('[home-pwa]', ...args);
   }
 }
 
