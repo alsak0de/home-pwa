@@ -207,7 +207,7 @@ export function App() {
         {/* Auth gate */}
         {state.unauthenticated ? (
           <div className="mt-8 rounded-xl border border-amber-300 bg-amber-50 dark:bg-amber-900/20 p-4 text-amber-900 dark:text-amber-100">
-            <div className="font-semibold mb-1">You must sign in with Google to use the controls</div>
+            <div className="font-semibold mb-1">You must sign in to use the controls</div>
             <div className="flex gap-2 mt-2">
               <button className="btn btn-ghost" onClick={handleSignIn} aria-label="Open Google sign-in" disabled={!hasApiBase}>
                 Sign in
