@@ -9,7 +9,7 @@ export function TopBar({ onRefresh, refreshing }: TopBarProps) {
   return (
     <div className="topbar">
       <div className="mx-auto max-w-md px-4 h-14 flex items-center justify-between">
-        <div className="font-semibold">Home Controls</div>
+        <div className="font-semibold">Sagarras' Panel</div>
         <button
           className="btn btn-ghost"
           onClick={onRefresh}
