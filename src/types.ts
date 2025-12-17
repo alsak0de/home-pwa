@@ -1,17 +1,9 @@
-export type AlarmState = { armed: boolean };
-export type GarageState = { open: boolean };
-export type DrivewayState = { open: boolean };
-export type LockState = { locked: boolean };
+export type AlarmState = 'armed' | 'disarmed';
+export type GarageState = 'open' | 'closed';
+export type DrivewayState = 'open' | 'closed';
+export type LockState = 'enabled' | 'disabled';
 
 export type Targets = 'alarm' | 'lock' | 'garage' | 'driveway';
-export type Commands =
-  | 'toggle'
-  | 'arm'
-  | 'disarm'
-  | 'open'
-  | 'close'
-  | 'lock'
-  | 'unlock';
 
 export type StatusResponse = {
   alarm: AlarmState;
@@ -21,8 +13,7 @@ export type StatusResponse = {
 };
 
 export type ActionRequest = {
-  target: Targets;
-  command: Commands;
+  button: Targets;
 };
 
 export type ActionResponse = {

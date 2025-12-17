@@ -94,24 +94,21 @@ Base URL: `VITE_API_BASE_URL`
 Response (JSON):
 ```json
 {
-  "alarm": { "armed": true },
-  "garage": { "open": false },
-  "driveway": { "open": true },
-  "lock": { "locked": true }
+  "alarm": "armed",         // or "disarmed"
+  "garage": "open",         // or "closed"
+  "driveway": "closed",     // or "open"
+  "lock": "enabled"         // or "disabled" (optional field)
 }
 ```
 
 Notes:
-- `lock` may be missing. The UI will treat Lock as action-only when no state is present.
+- `lock` may be missing. The UI treats the lock tile as an action-only scene; if present, its label may reflect the value.
 
 ### POST `/v1/action`
 
 Request (JSON):
 ```json
-{
-  "target": "alarm" | "lock" | "garage" | "driveway",
-  "command": "toggle" | "arm" | "disarm" | "open" | "close" | "lock" | "unlock"
-}
+{ "button": "alarm" | "lock" | "garage" | "driveway" }
 ```
 
 Response (JSON):
@@ -126,11 +123,8 @@ Response (JSON):
 
 ### Business Rules Implemented
 
-- Alarm: if `armed === true` → `disarm`; else `arm`
-- Garage/Driveway: toggle `open`/`close` based on status
-- Lock:
-  - If state exists: toggle `lock`/`unlock`
-  - If no state: send `toggle` and rely on feedback toast
+- The frontend just reports which tile was pressed via `target`
+- The backend decides how to interpret the press (arm/disarm, open/close, etc.)
 
 ### Networking
 

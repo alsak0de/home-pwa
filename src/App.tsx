@@ -3,7 +3,7 @@ import { ControlTile } from './components/ControlTile';
 import { TopBar } from './components/TopBar';
 import { ApiError, getStatus, postAction } from './api/api';
 import type { ActionRequest, StatusResponse, Targets } from './types';
-import { Car, DoorClosed, DoorOpen, Lock as LockIcon, Shield, ShieldOff, Unlock } from 'lucide-react';
+import { Car, DoorClosed, DoorOpen, Home, Shield, ShieldOff } from 'lucide-react';
 import { DEBUG_ENABLED, debugLog } from './utils/debug';
 
 type AppState = {
@@ -101,6 +101,14 @@ export function App() {
   const handleAction = useCallback(
     async (req: ActionRequest) => {
       DEBUG_ENABLED && debugLog('SEND_START', req);
+      // light haptic feedback on press (non-blocking)
+      try {
+        if ('vibrate' in navigator) {
+          navigator.vibrate?.(8);
+        }
+      } catch {
+        // ignore
+      }
       dispatch({ type: 'SEND_START', target: req.target });
       try {
         const res = await postAction(req);
@@ -131,10 +139,9 @@ export function App() {
     []
   );
 
-  const alarm = state.status?.alarm;
-  const garage = state.status?.garage;
-  const driveway = state.status?.driveway;
-  const lock = state.status?.lock;
+  const alarm = state.status?.alarm; // 'armed' | 'disarmed'
+  const garage = state.status?.garage; // 'open' | 'closed'
+  const driveway = state.status?.driveway; // 'open' | 'closed'
 
   const tiles = useMemo(() => {
     const items: Array<{
@@ -146,61 +153,60 @@ export function App() {
       onClick: () => void;
     }> = [];
 
-    // Alarm
+    // Home scene (action-only button) — first
+    items.push({
+      key: 'lock',
+      title: 'Home',
+      label: 'Tap to run',
+      variant: 'neutral',
+      icon: <Home className="h-full w-full" />,
+      onClick: () => {
+        // Action-only scene for now
+        void handleAction({ button: 'lock' });
+      }
+    });
+
+    // Alarm — second
     items.push({
       key: 'alarm',
       title: 'Alarm',
-      label: alarm ? (alarm.armed ? 'Armed' : 'Disarmed') : undefined,
-      variant: alarm ? (alarm.armed ? 'danger' : 'neutral') : 'neutral',
-      icon: alarm && alarm.armed ? <Shield className="h-full w-full" /> : <ShieldOff className="h-full w-full" />,
+      label: alarm ? (alarm === 'armed' ? 'Enabled' : 'Disabled') : undefined,
+      // Red when enabled, grey when disabled
+      variant: alarm ? (alarm === 'armed' ? 'danger' : 'neutral') : 'neutral',
+      icon: alarm && alarm === 'armed' ? <Shield className="h-full w-full" /> : <ShieldOff className="h-full w-full" />,
       onClick: () => {
-        const command = alarm?.armed ? 'disarm' : 'arm';
-        void handleAction({ target: 'alarm', command });
+        void handleAction({ button: 'alarm' });
       }
     });
 
-    // Garage
-    items.push({
-      key: 'garage',
-      title: 'Garage',
-      label: garage ? (garage.open ? 'Open' : 'Closed') : undefined,
-      variant: garage ? (garage.open ? 'warning' : 'ok') : 'neutral',
-      icon: garage && garage.open ? <DoorOpen className="h-full w-full" /> : <DoorClosed className="h-full w-full" />,
-      onClick: () => {
-        const command = garage?.open ? 'close' : 'open';
-        void handleAction({ target: 'garage', command });
-      }
-    });
-
-    // Driveway
+    // Driveway — third
     items.push({
       key: 'driveway',
       title: 'Driveway',
-      label: driveway ? (driveway.open ? 'Open' : 'Closed') : undefined,
-      variant: driveway ? (driveway.open ? 'warning' : 'ok') : 'neutral',
+      label: driveway ? (driveway === 'open' ? 'Open' : 'Closed') : undefined,
+      // Green when closed, red when open
+      variant: driveway ? (driveway === 'open' ? 'danger' : 'ok') : 'neutral',
       icon: <Car className="h-full w-full" />,
       onClick: () => {
-        const command = driveway?.open ? 'close' : 'open';
-        void handleAction({ target: 'driveway', command });
+        void handleAction({ button: 'driveway' });
       }
     });
 
-    // Lock
+    // Garage — fourth
     items.push({
-      key: 'lock',
-      title: 'Lock',
-      label: lock ? (lock.locked ? 'Locked' : 'Unlocked') : 'Tap to toggle',
-      variant: lock ? (lock.locked ? 'ok' : 'warning') : 'neutral',
-      icon: lock ? (lock.locked ? <LockIcon className="h-full w-full" /> : <Unlock className="h-full w-full" />) : <LockIcon className="h-full w-full" />,
+      key: 'garage',
+      title: 'Garage',
+      label: garage ? (garage === 'open' ? 'Open' : 'Closed') : undefined,
+      // Green when closed, red when open
+      variant: garage ? (garage === 'open' ? 'danger' : 'ok') : 'neutral',
+      icon: garage && garage === 'open' ? <DoorOpen className="h-full w-full" /> : <DoorClosed className="h-full w-full" />,
       onClick: () => {
-        // If state exists, toggle lock/unlock; otherwise generic toggle
-        const command: ActionRequest['command'] = lock ? (lock.locked ? 'unlock' : 'lock') : 'toggle';
-        void handleAction({ target: 'lock', command });
+        void handleAction({ button: 'garage' });
       }
     });
 
     return items;
-  }, [alarm, garage, driveway, lock, handleAction]);
+  }, [alarm, garage, driveway, handleAction]);
 
   return (
     <div className="min-h-full">

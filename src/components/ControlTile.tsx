@@ -14,10 +14,10 @@ export type ControlTileProps = {
 };
 
 const variantClasses: Record<Variant, string> = {
-  ok: 'bg-emerald-50 text-emerald-900 dark:bg-emerald-900/20 dark:text-emerald-200',
-  warning: 'bg-amber-50 text-amber-900 dark:bg-amber-900/20 dark:text-amber-200',
-  danger: 'bg-rose-50 text-rose-900 dark:bg-rose-900/20 dark:text-rose-200',
-  neutral: 'bg-slate-50 text-slate-900 dark:bg-slate-800/50 dark:text-slate-200'
+  ok: 'bg-emerald-600 text-white dark:bg-emerald-600',
+  warning: 'bg-amber-600 text-white dark:bg-amber-600',
+  danger: 'bg-rose-600 text-white dark:bg-rose-600',
+  neutral: 'bg-slate-600 text-white dark:bg-slate-600'
 };
 
 export function ControlTile({
@@ -32,17 +32,17 @@ export function ControlTile({
 }: ControlTileProps) {
   return (
     <button
-      className={`tile w-full ${variantClasses[variant]}`}
+      className={`tile w-full ${variantClasses[variant]} transition-transform active:scale-[0.98] focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-400 shadow-md active:shadow-sm`}
       onClick={onClick}
       disabled={disabled}
       aria-label={ariaLabel ?? title}
       aria-busy={sending ? 'true' : 'false'}
     >
       <div className="tile-content">
-        <div className="h-10 w-10 sm:h-12 sm:w-12">{icon}</div>
+        <div className="h-10 w-10 sm:h-12 sm:w-12" aria-hidden="true">{icon}</div>
         <div className="text-lg font-semibold">{title}</div>
-        {label ? <div className="text-sm opacity-80">{label}</div> : null}
-        {sending ? <div className="text-xs opacity-80">Sending…</div> : null}
+        {label ? <div className="text-sm/5 opacity-90">{label}</div> : null}
+        {sending ? <div className="text-xs opacity-90">Sending…</div> : null}
       </div>
     </button>
   );
