@@ -50,7 +50,7 @@ export async function getStatus(): Promise<StatusResponse> {
   const doFetch = async (): Promise<StatusResponse> => {
     const signal = makeAbortSignal(9000);
     DEBUG_ENABLED && debugLog('GET', url);
-    const res = await fetch(url, { credentials: 'include', signal });
+    const res = await fetch(url, { credentials: 'include', signal, redirect: 'manual' });
     DEBUG_ENABLED && debugLog('GET response', { url: res.url, status: res.status, redirected: res.redirected, contentType: res.headers.get('content-type') });
     if ((res.status >= 300 && res.status < 400) || res.status === 401 || res.status === 403 || isLikelyHtml(res.headers.get('content-type'))) {
       throw new ApiError('Unauthenticated', { unauthenticated: true, statusCode: res.status });
@@ -85,6 +85,7 @@ export async function postAction(req: ActionRequest): Promise<ActionResponse> {
     method: 'POST',
     credentials: 'include',
     signal,
+    redirect: 'manual',
     headers: { 'content-type': 'application/json' },
     body: JSON.stringify(req)
   });
