@@ -61,6 +61,14 @@ export function App() {
   const statusPath: string = (import.meta.env.VITE_STATUS_PATH as string) || '/v1/status';
   const actionPath: string = (import.meta.env.VITE_ACTION_PATH as string) || '/v1/action';
   const cfTeamDomain: string = (import.meta.env.VITE_CF_TEAM_DOMAIN as string) || '';
+  const authCompletePath: string = (() => {
+    const suffix = '/status';
+    if (statusPath.endsWith(suffix)) {
+      return statusPath.slice(0, -suffix.length) + '/auth-complete';
+    }
+    const trimmed = statusPath.replace(/\/+$/, '');
+    return `${trimmed}/auth-complete`;
+  })();
 
   const load = useCallback(async () => {
     DEBUG_ENABLED && debugLog('LOAD_START');
@@ -85,8 +93,28 @@ export function App() {
 
   useEffect(() => {
     DEBUG_ENABLED && debugLog('App mount', { apiBase, statusPath, actionPath });
+    // Listen for auth completion message from API auth-complete page
+    const allowedOrigin = (() => {
+      try {
+        return new URL(apiBase).origin;
+      } catch {
+        return '';
+      }
+    })();
+    const onMessage = (e: MessageEvent) => {
+      try {
+        if (e.data === 'auth-ok' && (!allowedOrigin || e.origin === allowedOrigin)) {
+          DEBUG_ENABLED && debugLog('Received auth-ok message from', e.origin);
+          void load();
+        }
+      } catch {
+        // ignore
+      }
+    };
+    window.addEventListener('message', onMessage);
     void load();
-  }, [load]);
+    return () => window.removeEventListener('message', onMessage);
+  }, [load, apiBase, statusPath, actionPath]);
 
   const handleSignIn = useCallback(() => {
     const base = apiBase.replace(/\/+$/, '');
@@ -95,18 +123,18 @@ export function App() {
       return;
     }
     // Open Access login in a new tab, then user returns and taps Retry
-    const redirectUrl = encodeURIComponent(`${base}${statusPath}`);
+    const redirectUrl = encodeURIComponent(`${base}${authCompletePath}`);
     if (cfTeamDomain) {
       const loginUrl = `https://${cfTeamDomain}/cdn-cgi/access/login?redirect_url=${redirectUrl}`;
       DEBUG_ENABLED && debugLog('handleSignIn → open login tab (team domain)', loginUrl);
       window.open(loginUrl, '_blank', 'noopener,noreferrer');
     } else {
       // Fallback: open the protected resource; Access will redirect to the team login
-      const loginUrl = `${base}${statusPath}`;
+      const loginUrl = `${base}${authCompletePath}`;
       DEBUG_ENABLED && debugLog('handleSignIn → open protected resource (fallback)', loginUrl);
       window.open(loginUrl, '_blank', 'noopener,noreferrer');
     }
-  }, [apiBase, statusPath]);
+  }, [apiBase, authCompletePath, cfTeamDomain]);
 
   const handleAction = useCallback(
     async (req: ActionRequest) => {
@@ -234,7 +262,7 @@ export function App() {
               <button className="btn btn-ghost" onClick={load} aria-label="Retry fetching status">Retry</button>
             </div>
             <div className="text-xs opacity-80 mt-2">
-              A login tab will open. After signing in, return here and tap Retry.
+              A login tab will open. After signing in, this page will refresh automatically or you can tap Retry.
             </div>
             {!hasApiBase ? (
               <div className="text-xs opacity-80 mt-2">
