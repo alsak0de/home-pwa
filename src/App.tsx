@@ -122,18 +122,11 @@ export function App() {
       DEBUG_ENABLED && debugLog('handleSignIn: missing api base');
       return;
     }
-    // Open Access login in a new tab, then user returns and taps Retry
-    const redirectUrl = encodeURIComponent(`${base}${authCompletePath}`);
-    if (cfTeamDomain) {
-      const loginUrl = `https://${cfTeamDomain}/cdn-cgi/access/login?redirect_url=${redirectUrl}`;
-      DEBUG_ENABLED && debugLog('handleSignIn → open login tab (team domain)', loginUrl);
-      window.open(loginUrl, '_blank', 'noopener,noreferrer');
-    } else {
-      // Fallback: open the protected resource; Access will redirect to the team login
-      const loginUrl = `${base}${authCompletePath}`;
-      DEBUG_ENABLED && debugLog('handleSignIn → open protected resource (fallback)', loginUrl);
-      window.open(loginUrl, '_blank', 'noopener,noreferrer');
-    }
+    // Always open the protected API resource; Access will 302 to the correct team login URL (with kid/meta),
+    // and upon success redirect back to /auth-complete to signal the panel.
+    const loginUrl = `${base}${authCompletePath}`;
+    DEBUG_ENABLED && debugLog('handleSignIn → open protected resource', loginUrl);
+    window.open(loginUrl, '_blank', 'noopener,noreferrer');
   }, [apiBase, authCompletePath, cfTeamDomain]);
 
   const handleAction = useCallback(
