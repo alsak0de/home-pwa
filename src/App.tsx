@@ -302,7 +302,7 @@ export function App() {
       title: 'Pool',
       label: pool ? (pool === 'on' ? 'On' : 'Off') : undefined,
       variant: pool ? (pool === 'on' ? 'warning' : 'neutral') : 'neutral',
-      icon: <Waves className="h-full w-full" />,
+      icon: <Waves className={`h-full w-full ${pool === 'on' ? 'text-amber-300' : ''}`} />,
       onClick: () => void handleAction({ button: 'pool' })
     });
     items.push({
@@ -310,7 +310,7 @@ export function App() {
       title: 'Garden',
       label: garden ? (garden === 'on' ? 'On' : 'Off') : undefined,
       variant: garden ? (garden === 'on' ? 'warning' : 'neutral') : 'neutral',
-      icon: <Sun className="h-full w-full" />,
+      icon: <Sun className={`h-full w-full ${garden === 'on' ? 'text-amber-300' : ''}`} />,
       onClick: () => void handleAction({ button: 'garden' })
     });
     items.push({
@@ -318,7 +318,7 @@ export function App() {
       title: 'Porch',
       label: porch ? (porch === 'on' ? 'On' : 'Off') : undefined,
       variant: porch ? (porch === 'on' ? 'warning' : 'neutral') : 'neutral',
-      icon: <Lightbulb className="h-full w-full" />,
+      icon: <Lightbulb className={`h-full w-full ${porch === 'on' ? 'text-amber-300' : ''}`} />,
       onClick: () => void handleAction({ button: 'porch' })
     });
     items.push({
@@ -326,7 +326,7 @@ export function App() {
       title: 'Backyard',
       label: backyard ? (backyard === 'on' ? 'On' : 'Off') : undefined,
       variant: backyard ? (backyard === 'on' ? 'warning' : 'neutral') : 'neutral',
-      icon: <Trees className="h-full w-full" />,
+      icon: <Trees className={`h-full w-full ${backyard === 'on' ? 'text-amber-300' : ''}`} />,
       onClick: () => void handleAction({ button: 'backyard' })
     });
 
