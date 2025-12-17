@@ -73,9 +73,9 @@ export function App() {
         DEBUG_ENABLED && debugLog('LOAD_UNAUTH');
         dispatch({ type: 'LOAD_UNAUTH' });
       } else {
-        // Network/CORS errors appear as TypeError and won't include auth signals.
-        // Do NOT show the sign-in UI; surface a transient error instead.
+        // Treat network/CORS failures as unauthenticated too (Access redirects)
         dispatch({ type: 'LOAD_ERROR' });
+        dispatch({ type: 'LOAD_UNAUTH' });
         DEBUG_ENABLED && debugLog('LOAD_ERROR (network/CORS)', e);
         dispatch({ type: 'TOAST', message: 'Failed to load status', kind: 'error' });
       }
