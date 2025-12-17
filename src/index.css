@@ -36,10 +36,16 @@ body {
 
 .topbar {
   @apply sticky top-0 z-20 w-full bg-white/80 dark:bg-gray-950/80 backdrop-blur border-b border-gray-200 dark:border-gray-800;
+  /* Respect iOS safe-area when running as standalone (PWA) */
+  padding-top: constant(safe-area-inset-top);
+  padding-top: env(safe-area-inset-top);
 }
 
 .toast {
   @apply fixed bottom-4 left-1/2 -translate-x-1/2 px-4 py-2 rounded-lg text-sm shadow bg-gray-900 text-white;
+  /* Lift above the home indicator on iPhone */
+  bottom: calc(1rem + env(safe-area-inset-bottom));
+  bottom: calc(1rem + constant(safe-area-inset-bottom));
 }
 
 
