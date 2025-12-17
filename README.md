@@ -20,6 +20,8 @@ VITE_API_BASE_URL=https://api.<MY_DOMAIN>
 # For example, if both GET status and POST action are at /pwa:
 # VITE_STATUS_PATH=/pwa
 # VITE_ACTION_PATH=/pwa
+# If using Cloudflare Access, set your team domain so the app opens the correct login URL:
+# VITE_CF_TEAM_DOMAIN=<your-team>.cloudflareaccess.com
 ```
 
 This is your Cloudflare Tunnel hostname that fronts Node-RED (protected by Cloudflare Access).

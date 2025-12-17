@@ -60,6 +60,7 @@ export function App() {
   const hasApiBase = apiBase.trim().length > 0;
   const statusPath: string = (import.meta.env.VITE_STATUS_PATH as string) || '/v1/status';
   const actionPath: string = (import.meta.env.VITE_ACTION_PATH as string) || '/v1/action';
+  const cfTeamDomain: string = (import.meta.env.VITE_CF_TEAM_DOMAIN as string) || '';
 
   const load = useCallback(async () => {
     DEBUG_ENABLED && debugLog('LOAD_START');
@@ -94,16 +95,17 @@ export function App() {
       return;
     }
     // Open Access login in a new tab, then user returns and taps Retry
-    let origin = '';
-    try {
-      origin = new URL(base).origin;
-    } catch {
-      origin = base;
-    }
     const redirectUrl = encodeURIComponent(`${base}${statusPath}`);
-    const loginUrl = `${origin}/cdn-cgi/access/login?redirect_url=${redirectUrl}`;
-    DEBUG_ENABLED && debugLog('handleSignIn → open login tab', loginUrl);
-    window.open(loginUrl, '_blank', 'noopener,noreferrer');
+    if (cfTeamDomain) {
+      const loginUrl = `https://${cfTeamDomain}/cdn-cgi/access/login?redirect_url=${redirectUrl}`;
+      DEBUG_ENABLED && debugLog('handleSignIn → open login tab (team domain)', loginUrl);
+      window.open(loginUrl, '_blank', 'noopener,noreferrer');
+    } else {
+      // Fallback: open the protected resource; Access will redirect to the team login
+      const loginUrl = `${base}${statusPath}`;
+      DEBUG_ENABLED && debugLog('handleSignIn → open protected resource (fallback)', loginUrl);
+      window.open(loginUrl, '_blank', 'noopener,noreferrer');
+    }
   }, [apiBase, statusPath]);
 
   const handleAction = useCallback(
