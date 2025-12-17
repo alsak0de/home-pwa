@@ -32,7 +32,7 @@ export function ControlTile({
 }: ControlTileProps) {
   return (
     <button
-      className={`tile w-full ${variantClasses[variant]} transition-transform duration-75 active:scale-[0.97] active:translate-y-[1px] focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-400 shadow-md active:shadow-sm`}
+      className={`tile w-full ${variantClasses[variant]} transition-transform active:scale-[0.98] focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-400 shadow-md active:shadow-sm`}
       onClick={onClick}
       disabled={disabled}
       aria-label={ariaLabel ?? title}

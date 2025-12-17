@@ -5,7 +5,6 @@ import { ApiError, getStatus, postAction } from './api/api';
 import type { ActionRequest, StatusResponse, Targets } from './types';
 import { Car, DoorClosed, DoorOpen, Home, Shield, ShieldOff } from 'lucide-react';
 import { DEBUG_ENABLED, debugLog } from './utils/debug';
-import { playPressFeedback } from './utils/haptics';
 
 type AppState = {
   loading: boolean;
@@ -102,8 +101,14 @@ export function App() {
   const handleAction = useCallback(
     async (req: ActionRequest) => {
       DEBUG_ENABLED && debugLog('SEND_START', req);
-      // Cross-platform press feedback (Android vibrate / iOS audio click)
-      playPressFeedback();
+      // light haptic feedback on press (non-blocking)
+      try {
+        if ('vibrate' in navigator) {
+          navigator.vibrate?.(8);
+        }
+      } catch {
+        // ignore
+      }
       dispatch({ type: 'SEND_START', target: req.target });
       try {
         const res = await postAction(req);
@@ -151,7 +156,7 @@ export function App() {
     // Home scene (action-only button) — first
     items.push({
       key: 'lock',
-      title: 'Lock',
+      title: 'Home',
       label: 'Tap to run',
       variant: 'neutral',
       icon: <Home className="h-full w-full" />,
