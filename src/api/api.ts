@@ -53,8 +53,9 @@ export async function getStatus(): Promise<StatusResponse> {
     const signal = makeAbortSignal(9000);
     DEBUG_ENABLED && debugLog('GET', url);
     const res = await fetch(url, { credentials: 'include', signal });
-    DEBUG_ENABLED && debugLog('GET response', { url: res.url, status: res.status, contentType: res.headers.get('content-type') });
-    if (res.status === 401 || res.status === 403 || isLikelyHtml(res.headers.get('content-type'))) {
+    DEBUG_ENABLED && debugLog('GET response', { url: res.url, status: res.status, redirected: res.redirected, contentType: res.headers.get('content-type') });
+    // Treat Access redirects (3xx) and HTML responses as unauthenticated
+    if ((res.status >= 300 && res.status < 400) || res.status === 401 || res.status === 403 || isLikelyHtml(res.headers.get('content-type'))) {
       throw new ApiError('Unauthenticated', { unauthenticated: true, statusCode: res.status });
     }
     if (!res.ok) {
@@ -93,8 +94,8 @@ export async function postAction(req: ActionRequest): Promise<ActionResponse> {
     body: JSON.stringify(req)
   });
 
-  DEBUG_ENABLED && debugLog('POST response', { url: res.url, status: res.status, contentType: res.headers.get('content-type') });
-  if (res.status === 401 || res.status === 403 || isLikelyHtml(res.headers.get('content-type'))) {
+  DEBUG_ENABLED && debugLog('POST response', { url: res.url, status: res.status, redirected: res.redirected, contentType: res.headers.get('content-type') });
+  if ((res.status >= 300 && res.status < 400) || res.status === 401 || res.status === 403 || isLikelyHtml(res.headers.get('content-type'))) {
     throw new ApiError('Unauthenticated', { unauthenticated: true, statusCode: res.status });
   }
   if (!res.ok) {
