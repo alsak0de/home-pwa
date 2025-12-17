@@ -133,6 +133,19 @@ export function App() {
     return () => window.removeEventListener('message', onMessage);
   }, [load, apiBase, statusPath, actionPath]);
 
+  // If user returns focus to the panel (e.g., after closing the login tab),
+  // try loading again to avoid requiring a manual refresh.
+  useEffect(() => {
+    const onVisibility = () => {
+      if (document.visibilityState === 'visible' && state.unauthenticated) {
+        DEBUG_ENABLED && debugLog('Visibilitychange → retry load');
+        void load();
+      }
+    };
+    document.addEventListener('visibilitychange', onVisibility);
+    return () => document.removeEventListener('visibilitychange', onVisibility);
+  }, [state.unauthenticated, load]);
+
   const handleSignIn = useCallback(() => {
     const base = apiBase.replace(/\/+$/, '');
     if (!base) {
