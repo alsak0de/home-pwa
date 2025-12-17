@@ -3,7 +3,7 @@ import { ControlTile } from './components/ControlTile';
 import { TopBar } from './components/TopBar';
 import { ApiError, getStatus, postAction } from './api/api';
 import type { ActionRequest, StatusResponse, Targets } from './types';
-import { Car, DoorClosed, DoorOpen, Home, Shield, ShieldOff } from 'lucide-react';
+import { Car, DoorClosed, DoorOpen, Home, Shield, ShieldOff, Lightbulb, Sun, Waves, Trees } from 'lucide-react';
 import { DEBUG_ENABLED, debugLog } from './utils/debug';
 
 type AppState = {
@@ -28,7 +28,16 @@ const initialState: AppState = {
   loading: true,
   unauthenticated: false,
   status: null,
-  sending: { alarm: false, lock: false, garage: false, driveway: false }
+  sending: {
+    alarm: false,
+    lock: false,
+    garage: false,
+    driveway: false,
+    pool: false,
+    garden: false,
+    porch: false,
+    backyard: false
+  }
 };
 
 function reducer(state: AppState, action: Action): AppState {
@@ -220,6 +229,10 @@ export function App() {
   const alarm = state.status?.alarm; // 'armed' | 'disarmed'
   const garage = state.status?.garage; // 'open' | 'closed'
   const driveway = state.status?.driveway; // 'open' | 'closed'
+  const pool = state.status?.pool; // 'on' | 'off'
+  const garden = state.status?.garden; // 'on' | 'off'
+  const porch = state.status?.porch; // 'on' | 'off'
+  const backyard = state.status?.backyard; // 'on' | 'off'
 
   const tiles = useMemo(() => {
     const items: Array<{
@@ -283,8 +296,42 @@ export function App() {
       }
     });
 
+    // Lights row — Pool, Garden, Porch, Backyard
+    items.push({
+      key: 'pool',
+      title: 'Pool',
+      label: pool ? (pool === 'on' ? 'On' : 'Off') : undefined,
+      variant: pool ? (pool === 'on' ? 'warning' : 'neutral') : 'neutral',
+      icon: <Waves className="h-full w-full" />,
+      onClick: () => void handleAction({ button: 'pool' })
+    });
+    items.push({
+      key: 'garden',
+      title: 'Garden',
+      label: garden ? (garden === 'on' ? 'On' : 'Off') : undefined,
+      variant: garden ? (garden === 'on' ? 'warning' : 'neutral') : 'neutral',
+      icon: <Sun className="h-full w-full" />,
+      onClick: () => void handleAction({ button: 'garden' })
+    });
+    items.push({
+      key: 'porch',
+      title: 'Porch',
+      label: porch ? (porch === 'on' ? 'On' : 'Off') : undefined,
+      variant: porch ? (porch === 'on' ? 'warning' : 'neutral') : 'neutral',
+      icon: <Lightbulb className="h-full w-full" />,
+      onClick: () => void handleAction({ button: 'porch' })
+    });
+    items.push({
+      key: 'backyard',
+      title: 'Backyard',
+      label: backyard ? (backyard === 'on' ? 'On' : 'Off') : undefined,
+      variant: backyard ? (backyard === 'on' ? 'warning' : 'neutral') : 'neutral',
+      icon: <Trees className="h-full w-full" />,
+      onClick: () => void handleAction({ button: 'backyard' })
+    });
+
     return items;
-  }, [alarm, garage, driveway, handleAction]);
+  }, [alarm, garage, driveway, pool, garden, porch, backyard, handleAction]);
 
   return (
     <div className="min-h-full">

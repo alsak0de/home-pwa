@@ -2,14 +2,27 @@ export type AlarmState = 'armed' | 'disarmed';
 export type GarageState = 'open' | 'closed';
 export type DrivewayState = 'open' | 'closed';
 export type LockState = 'enabled' | 'disabled';
+export type LightState = 'on' | 'off';
 
-export type Targets = 'alarm' | 'lock' | 'garage' | 'driveway';
+export type Targets =
+  | 'alarm'
+  | 'lock'
+  | 'garage'
+  | 'driveway'
+  | 'pool'
+  | 'garden'
+  | 'porch'
+  | 'backyard';
 
 export type StatusResponse = {
   alarm: AlarmState;
   garage: GarageState;
   driveway: DrivewayState;
   lock?: LockState;
+  pool?: LightState;
+  garden?: LightState;
+  porch?: LightState;
+  backyard?: LightState;
 };
 
 export type ActionRequest = {
