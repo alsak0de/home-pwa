@@ -5,14 +5,14 @@ import { App } from './App';
 
 const root = document.getElementById('root')!;
 ReactDOM.createRoot(root).render(
-  <React.StrictMode>
-    <App />
-  </React.StrictMode>
+	<React.StrictMode>
+		<App />
+	</React.StrictMode>
 );
 
 // Register minimal service worker for installability
 if ('serviceWorker' in navigator) {
-  window.addEventListener('load', () => {
+	window.addEventListener('load', () => {
     navigator.serviceWorker
       .register('/sw.js')
       .catch(() => {

@@ -143,7 +143,24 @@ export function App() {
     // and upon success redirect back to /auth-complete to signal the panel.
     const loginUrl = `${base}${authCompletePath}`;
     DEBUG_ENABLED && debugLog('handleSignIn → open protected resource', loginUrl);
-    window.open(loginUrl, '_blank', 'noopener,noreferrer');
+    // Important: do NOT use 'noopener' because we rely on window.opener postMessage
+    window.open(loginUrl, '_blank');
+    // Fallback: poll the API in case postMessage is blocked (e.g., some iOS cases)
+    dispatch({ type: 'TOAST', message: 'Waiting for sign-in…', kind: 'success' });
+    const started = Date.now();
+    (async () => {
+      while (Date.now() - started < 45000) {
+        try {
+          const s = await getStatus();
+          dispatch({ type: 'LOAD_SUCCESS', status: s });
+          dispatch({ type: 'TOAST' }); // clear
+          return;
+        } catch {
+          await new Promise((r) => setTimeout(r, 1500));
+        }
+      }
+      dispatch({ type: 'TOAST', message: 'Still waiting for sign-in. Tap Retry.', kind: 'error' });
+    })();
   }, [apiBase, authCompletePath, cfTeamDomain]);
 
   const handleAction = useCallback(
