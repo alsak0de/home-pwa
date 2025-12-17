@@ -105,7 +105,24 @@ export function App() {
       try {
         if (e.data === 'auth-ok' && (!allowedOrigin || e.origin === allowedOrigin)) {
           DEBUG_ENABLED && debugLog('Received auth-ok message from', e.origin);
-          void load();
+          // Poll the API for up to ~45s to allow the cookie to be minted,
+          // then update UI automatically without manual refresh.
+          dispatch({ type: 'TOAST', message: 'Signing in…', kind: 'success' });
+          const started = Date.now();
+          const poll = async () => {
+            while (Date.now() - started < 45000) {
+              try {
+                const s = await getStatus();
+                dispatch({ type: 'LOAD_SUCCESS', status: s });
+                dispatch({ type: 'TOAST' }); // clear toast
+                return;
+              } catch {
+                await new Promise((r) => setTimeout(r, 1500));
+              }
+            }
+            dispatch({ type: 'TOAST', message: 'Still waiting for sign-in. Tap Retry.', kind: 'error' });
+          };
+          void poll();
         }
       } catch {
         // ignore
