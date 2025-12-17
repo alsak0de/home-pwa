@@ -93,9 +93,17 @@ export function App() {
       DEBUG_ENABLED && debugLog('handleSignIn: missing api base');
       return;
     }
-    // Navigate directly to the protected resource; Access will 302 to the team login UI.
-    DEBUG_ENABLED && debugLog('handleSignIn → navigate', `${base}${statusPath}`);
-    window.location.href = `${base}${statusPath}`;
+    // Open Access login in a new tab, then user returns and taps Retry
+    let origin = '';
+    try {
+      origin = new URL(base).origin;
+    } catch {
+      origin = base;
+    }
+    const redirectUrl = encodeURIComponent(`${base}${statusPath}`);
+    const loginUrl = `${origin}/cdn-cgi/access/login?redirect_url=${redirectUrl}`;
+    DEBUG_ENABLED && debugLog('handleSignIn → open login tab', loginUrl);
+    window.open(loginUrl, '_blank', 'noopener,noreferrer');
   }, [apiBase, statusPath]);
 
   const handleAction = useCallback(
