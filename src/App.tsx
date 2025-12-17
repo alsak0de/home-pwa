@@ -156,7 +156,7 @@ export function App() {
     // Home scene (action-only button) — first
     items.push({
       key: 'lock',
-      title: 'Home',
+      title: 'Lock',
       label: 'Tap to run',
       variant: 'neutral',
       icon: <Home className="h-full w-full" />,
