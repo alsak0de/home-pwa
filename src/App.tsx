@@ -3,7 +3,9 @@ import { ControlTile } from './components/ControlTile';
 import { TopBar } from './components/TopBar';
 import { ApiError, getStatus, postAction } from './api/api';
 import type { ActionRequest, StatusResponse, Targets } from './types';
-import { Car, DoorClosed, DoorOpen, Home, Shield, ShieldOff, Lightbulb, Sun, Waves, Trees } from 'lucide-react';
+import { Car, DoorClosed, DoorOpen, Shield, ShieldOff, Lightbulb, Sun, Waves, Trees } from 'lucide-react';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faHouseLock } from '@fortawesome/free-solid-svg-icons';
 import { DEBUG_ENABLED, debugLog } from './utils/debug';
 
 type AppState = {
@@ -244,13 +246,13 @@ export function App() {
       onClick: () => void;
     }> = [];
 
-    // Home scene (action-only button) — first
+    // Leave & Lock scene (action-only button) — first
     items.push({
       key: 'lock',
-      title: 'Home',
+      title: 'Leave & Lock',
       label: 'Tap to run',
       variant: 'neutral',
-      icon: <Home className="h-full w-full" />,
+      icon: <FontAwesomeIcon icon={faHouseLock} className="h-full w-full" />,
       onClick: () => {
         // Action-only scene for now
         void handleAction({ button: 'lock' });
@@ -302,7 +304,7 @@ export function App() {
       title: 'Pool',
       label: pool ? (pool === 'on' ? 'On' : 'Off') : undefined,
       variant: pool ? (pool === 'on' ? 'warning' : 'neutral') : 'neutral',
-      icon: <Waves className={`h-full w-full ${pool === 'on' ? 'text-amber-300' : ''}`} />,
+      icon: <Waves className="h-full w-full" />,
       onClick: () => void handleAction({ button: 'pool' })
     });
     items.push({
@@ -310,7 +312,7 @@ export function App() {
       title: 'Garden',
       label: garden ? (garden === 'on' ? 'On' : 'Off') : undefined,
       variant: garden ? (garden === 'on' ? 'warning' : 'neutral') : 'neutral',
-      icon: <Sun className={`h-full w-full ${garden === 'on' ? 'text-amber-300' : ''}`} />,
+      icon: <Sun className="h-full w-full" />,
       onClick: () => void handleAction({ button: 'garden' })
     });
     items.push({
@@ -318,7 +320,7 @@ export function App() {
       title: 'Porch',
       label: porch ? (porch === 'on' ? 'On' : 'Off') : undefined,
       variant: porch ? (porch === 'on' ? 'warning' : 'neutral') : 'neutral',
-      icon: <Lightbulb className={`h-full w-full ${porch === 'on' ? 'text-amber-300' : ''}`} />,
+      icon: <Lightbulb className="h-full w-full" />,
       onClick: () => void handleAction({ button: 'porch' })
     });
     items.push({
@@ -326,7 +328,7 @@ export function App() {
       title: 'Backyard',
       label: backyard ? (backyard === 'on' ? 'On' : 'Off') : undefined,
       variant: backyard ? (backyard === 'on' ? 'warning' : 'neutral') : 'neutral',
-      icon: <Trees className={`h-full w-full ${backyard === 'on' ? 'text-amber-300' : ''}`} />,
+      icon: <Trees className="h-full w-full" />,
       onClick: () => void handleAction({ button: 'backyard' })
     });
 
