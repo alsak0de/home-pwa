@@ -3,9 +3,7 @@ import { ControlTile } from './components/ControlTile';
 import { TopBar } from './components/TopBar';
 import { ApiError, getStatus, postAction } from './api/api';
 import type { ActionRequest, StatusResponse, Targets } from './types';
-import { Car, DoorClosed, DoorOpen, Shield, ShieldOff, Lightbulb, Sun, Waves, Trees } from 'lucide-react';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faHouseLock } from '@fortawesome/free-solid-svg-icons';
+import { Car, DoorClosed, DoorOpen, Shield, ShieldOff, Lightbulb, Sun, Waves, Trees, Lock } from 'lucide-react';
 import { DEBUG_ENABLED, debugLog } from './utils/debug';
 
 type AppState = {
@@ -252,7 +250,7 @@ export function App() {
       title: 'Leave & Lock',
       label: 'Tap to run',
       variant: 'neutral',
-      icon: <FontAwesomeIcon icon={faHouseLock} className="h-full w-full" />,
+      icon: <Lock className="h-full w-full" />,
       onClick: () => {
         // Action-only scene for now
         void handleAction({ button: 'lock' });
