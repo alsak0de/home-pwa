@@ -248,7 +248,7 @@ export function App() {
     items.push({
       key: 'lock',
       title: 'Leave & Lock',
-      label: 'Tap to run',
+      label: 'Tap to lock',
       variant: 'neutral',
       icon: <Lock className="h-full w-full" />,
       onClick: () => {
