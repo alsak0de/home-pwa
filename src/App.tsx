@@ -250,7 +250,12 @@ export function App() {
       title: 'Leave & Lock',
       label: 'Tap to lock',
       variant: 'neutral',
-      icon: <Lock className="h-full w-full" />,
+      icon: (
+        <span className="relative block h-full w-full" aria-hidden="true">
+          <Home className="h-full w-full" />
+          <Lock className="absolute -bottom-1 -right-1 h-[50%] w-[50%]" />
+        </span>
+      ),
       onClick: () => {
         // Action-only scene for now
         void handleAction({ button: 'lock' });
