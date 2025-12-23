@@ -3,7 +3,7 @@ import { ControlTile } from './components/ControlTile';
 import { TopBar } from './components/TopBar';
 import { ApiError, getStatus, postAction } from './api/api';
 import type { ActionRequest, StatusResponse, Targets } from './types';
-import { Car, DoorClosed, DoorOpen, Shield, ShieldOff, Lightbulb, Sun, Waves, Trees, Lock, Home } from 'lucide-react';
+import { Car, DoorClosed, DoorOpen, Shield, ShieldOff, Lightbulb, Sun, Waves, Trees, Lock, Home, ChevronUp, ChevronDown, Square, ChevronsUpDown } from 'lucide-react';
 import { DEBUG_ENABLED, debugLog } from './utils/debug';
 
 type AppState = {
@@ -316,7 +316,7 @@ export function App() {
         isAction: false,
         title: 'Ground',
         variant: 'neutral',
-        icon: <Lightbulb className="h-full w-full" />,
+        icon: <ChevronsUpDown className="h-full w-full" />,
         onClick: () => navigate('ground')
       });
       items.push({
@@ -472,21 +472,74 @@ export function App() {
 
         {/* Tiles */}
         {state.status ? (
-          <div className="grid grid-cols-2 gap-3 sm:gap-4 mt-4">
-            {tiles.map((t) => (
-              <ControlTile
-                key={t.key}
-                title={t.title}
-                label={t.label}
-                variant={t.variant}
-                icon={t.icon}
-                onClick={t.onClick}
-                sending={t.isAction ? state.sending[t.key as Targets] : false}
-                disabled={(t.isAction ? state.sending[t.key as Targets] : false) || state.loading || state.unauthenticated}
-                ariaLabel={`${t.title} control`}
-              />
-            ))}
-          </div>
+          state.page === 'ground' ? (
+            <div className="grid grid-cols-2 gap-3 sm:gap-4 mt-4">
+              {[
+                { id: 'salon-garden', name: 'Salon: Garden' },
+                { id: 'salon-fixed', name: 'Salon: Fixed' },
+                { id: 'salon-porch', name: 'Salon: Porch' },
+                { id: 'kitchen-porch', name: 'Kitchen: Porch' },
+                { id: 'kitchen-dining', name: 'Kitchen: Dining' },
+                { id: 'kitchen-sink', name: 'Kitchen: Sink' },
+                { id: 'kitchen-yard', name: 'Kitchen: Yard' }
+              ].map((sh) => (
+                <div
+                  key={sh.id}
+                  className="tile w-full bg-slate-600 text-white dark:bg-slate-600 shadow-md"
+                  aria-label={`${sh.name} shutters`}
+                >
+                  <div className="flex flex-col items-center justify-center gap-2 h-28 sm:h-32">
+                    <div className="text-lg font-semibold">{sh.name}</div>
+                    <div className="flex items-center gap-2">
+                      <button
+                        className="btn btn-ghost text-white"
+                        onClick={() => void handleAction({ button: `shutter:${sh.id}:up` as unknown as Targets })}
+                        aria-label={`${sh.name} up`}
+                        disabled={state.loading || state.unauthenticated}
+                      >
+                        <ChevronUp className="h-5 w-5" />
+                        <span className="hidden sm:inline">Up</span>
+                      </button>
+                      <button
+                        className="btn btn-ghost text-white"
+                        onClick={() => void handleAction({ button: `shutter:${sh.id}:stop` as unknown as Targets })}
+                        aria-label={`${sh.name} stop`}
+                        disabled={state.loading || state.unauthenticated}
+                      >
+                        <Square className="h-5 w-5" />
+                        <span className="hidden sm:inline">Stop</span>
+                      </button>
+                      <button
+                        className="btn btn-ghost text-white"
+                        onClick={() => void handleAction({ button: `shutter:${sh.id}:down` as unknown as Targets })}
+                        aria-label={`${sh.name} down`}
+                        disabled={state.loading || state.unauthenticated}
+                      >
+                        <ChevronDown className="h-5 w-5" />
+                        <span className="hidden sm:inline">Down</span>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="grid grid-cols-2 gap-3 sm:gap-4 mt-4">
+              {tiles.map((t) => (
+                <ControlTile
+                  key={t.key}
+                  title={t.title}
+                  label={t.label}
+                  variant={t.variant}
+                  icon={t.icon}
+                  onClick={t.onClick}
+                  sending={t.isAction ? state.sending[t.key as Targets] : false}
+                  disabled={(t.isAction ? state.sending[t.key as Targets] : false) || state.loading || state.unauthenticated}
+                  ariaLabel={`${t.title} control`}
+                />
+              ))}
+            </div>
+          )
         ) : null}
       </main>
 
