@@ -11,6 +11,7 @@ export type ControlTileProps = {
   sending?: boolean;
   onClick?: () => void;
   ariaLabel?: string;
+  style?: React.CSSProperties;
 };
 
 const variantClasses: Record<Variant, string> = {
@@ -28,7 +29,8 @@ export function ControlTile({
   disabled,
   sending,
   onClick,
-  ariaLabel
+  ariaLabel,
+  style
 }: ControlTileProps) {
   return (
     <button
@@ -37,6 +39,7 @@ export function ControlTile({
       disabled={disabled}
       aria-label={ariaLabel ?? title}
       aria-busy={sending ? 'true' : 'false'}
+      style={style}
     >
       <div className="tile-content">
         <div className="h-10 w-10 sm:h-12 sm:w-12" aria-hidden="true">{icon}</div>

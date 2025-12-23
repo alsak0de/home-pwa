@@ -266,6 +266,7 @@ export function App() {
       variant: 'ok' | 'warning' | 'danger' | 'neutral';
       icon: JSX.Element;
       onClick: () => void;
+      style?: React.CSSProperties;
     }> = [];
 
     const navigate = (page: AppState['page']) => {
@@ -309,6 +310,19 @@ export function App() {
         title: 'Garden',
         variant: 'neutral',
         icon: <Trees className="h-full w-full" />,
+        style: (() => {
+          const total = 4;
+          const numOn =
+            (pool === 'on' ? 1 : 0) +
+            (garden === 'on' ? 1 : 0) +
+            (porch === 'on' ? 1 : 0) +
+            (backyard === 'on' ? 1 : 0);
+          const pct = Math.max(0, Math.min(100, Math.round((numOn / total) * 100)));
+          // Amber-600 (#d97706) and Slate-600 (#475569) for contrast
+          return {
+            background: `linear-gradient(to right, #d97706 ${pct}%, #475569 ${pct}%)`
+          } as React.CSSProperties;
+        })(),
         onClick: () => navigate('garden')
       });
       items.push({
@@ -655,6 +669,7 @@ export function App() {
                   onClick={t.onClick}
                   sending={t.isAction ? state.sending[t.key as Targets] : false}
                   disabled={(t.isAction ? state.sending[t.key as Targets] : false) || state.loading || state.unauthenticated}
+                  style={t.style}
                   ariaLabel={`${t.title} control`}
                 />
               ))}
