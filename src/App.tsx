@@ -12,6 +12,7 @@ type AppState = {
   status: StatusResponse | null;
   sending: Record<Targets, boolean>;
   toast?: { message: string; kind: 'success' | 'error' };
+  page: 'home' | 'garden' | 'ground' | "pati's" | "pablo's" | "lara's" | 'master';
 };
 
 type Action =
@@ -22,12 +23,14 @@ type Action =
   | { type: 'SEND_START'; target: Targets }
   | { type: 'SEND_END'; target: Targets }
   | { type: 'SET_STATUS'; status: StatusResponse }
-  | { type: 'TOAST'; message?: string; kind?: 'success' | 'error' };
+  | { type: 'TOAST'; message?: string; kind?: 'success' | 'error' }
+  | { type: 'NAVIGATE'; page: AppState['page'] };
 
 const initialState: AppState = {
   loading: true,
   unauthenticated: false,
   status: null,
+  page: 'home',
   sending: {
     alarm: false,
     lock: false,
@@ -58,6 +61,8 @@ function reducer(state: AppState, action: Action): AppState {
       return { ...state, status: action.status };
     case 'TOAST':
       return action.message ? { ...state, toast: { message: action.message, kind: action.kind ?? 'success' } } : { ...state, toast: undefined };
+    case 'NAVIGATE':
+      return { ...state, page: action.page };
     default:
       return state;
   }
@@ -102,6 +107,20 @@ export function App() {
 
   useEffect(() => {
     DEBUG_ENABLED && debugLog('App mount', { apiBase, statusPath, actionPath });
+    // Initialize page from hash without adding history entries
+    const hash = (location.hash || '').replace(/^#\/?/, '').toLowerCase();
+    const allowedPages = ['home', 'garden', 'ground', "pati's", "pablo's", "lara's", 'master'] as const;
+    const initialPage = (allowedPages as readonly string[]).includes(hash) ? (hash as AppState['page']) : 'home';
+    if (initialPage !== 'home') {
+      dispatch({ type: 'NAVIGATE', page: initialPage });
+    }
+    const onHashChange = () => {
+      const h = (location.hash || '').replace(/^#\/?/, '').toLowerCase();
+      if ((allowedPages as readonly string[]).includes(h)) {
+        dispatch({ type: 'NAVIGATE', page: h as AppState['page'] });
+      }
+    };
+    window.addEventListener('hashchange', onHashChange);
     // Listen for auth completion message from API auth-complete page
     const allowedOrigin = (() => {
       try {
@@ -139,7 +158,10 @@ export function App() {
     };
     window.addEventListener('message', onMessage);
     void load();
-    return () => window.removeEventListener('message', onMessage);
+    return () => {
+      window.removeEventListener('message', onMessage);
+      window.removeEventListener('hashchange', onHashChange);
+    };
   }, [load, apiBase, statusPath, actionPath]);
 
   // If user returns focus to the panel (e.g., after closing the login tab),
@@ -237,7 +259,8 @@ export function App() {
 
   const tiles = useMemo(() => {
     const items: Array<{
-      key: Targets;
+      key: string;
+      isAction: boolean;
       title: string;
       label?: string;
       variant: 'ok' | 'warning' | 'danger' | 'neutral';
@@ -245,104 +268,176 @@ export function App() {
       onClick: () => void;
     }> = [];
 
-    // Leave & Lock scene (action-only button) — first
-    items.push({
-      key: 'lock',
-      title: 'Leave & Lock',
-      label: 'Tap to lock',
-      // Red when open, green when closed, grey when unknown
-      variant: lockStatus ? (lockStatus === 'open' ? 'danger' : 'ok') : 'neutral',
-      icon: (
-        <span className="relative block h-full w-full" aria-hidden="true">
-          <Home className="h-full w-full" />
-          <Lock className="absolute -bottom-1 -right-1 h-[50%] w-[50%]" />
-        </span>
-      ),
-      onClick: () => {
-        // Action-only scene for now
-        void handleAction({ button: 'lock' });
-      }
-    });
+    const navigate = (page: AppState['page']) => {
+      // Update state
+      dispatch({ type: 'NAVIGATE', page });
+      // Update URL without adding a back entry
+      const targetHash = page === 'home' ? '' : `#${page}`;
+      const newUrl = `${location.pathname}${targetHash}`;
+      location.replace(newUrl);
+    };
 
-    // Alarm — second
-    items.push({
-      key: 'alarm',
-      title: 'Alarm',
-      label: alarm ? (alarm === 'armed' ? 'Enabled' : 'Disabled') : undefined,
-      // Red when enabled, grey when disabled
-      variant: alarm ? (alarm === 'armed' ? 'danger' : 'neutral') : 'neutral',
-      icon: alarm && alarm === 'armed' ? <Shield className="h-full w-full" /> : <ShieldOff className="h-full w-full" />,
-      onClick: () => {
-        void handleAction({ button: 'alarm' });
-      }
-    });
-
-    // Driveway — third
-    items.push({
-      key: 'driveway',
-      title: 'Driveway',
-      label: driveway ? (driveway === 'open' ? 'Open' : 'Closed') : undefined,
-      // Green when closed, red when open
-      variant: driveway ? (driveway === 'open' ? 'danger' : 'ok') : 'neutral',
-      icon: <Car className="h-full w-full" />,
-      onClick: () => {
-        void handleAction({ button: 'driveway' });
-      }
-    });
-
-    // Garage — fourth
-    items.push({
-      key: 'garage',
-      title: 'Garage',
-      label: garage ? (garage === 'open' ? 'Open' : 'Closed') : undefined,
-      // Green when closed, red when open
-      variant: garage ? (garage === 'open' ? 'danger' : 'ok') : 'neutral',
-      icon: garage && garage === 'open' ? <DoorOpen className="h-full w-full" /> : <DoorClosed className="h-full w-full" />,
-      onClick: () => {
-        void handleAction({ button: 'garage' });
-      }
-    });
-
-    // Lights row — Pool, Garden, Porch, Backyard
-    items.push({
-      key: 'pool',
-      title: 'Pool',
-      label: pool ? (pool === 'on' ? 'On' : 'Off') : undefined,
-      variant: pool ? (pool === 'on' ? 'warning' : 'neutral') : 'neutral',
-      icon: <Waves className="h-full w-full" />,
-      onClick: () => void handleAction({ button: 'pool' })
-    });
-    items.push({
-      key: 'garden',
-      title: 'Garden',
-      label: garden ? (garden === 'on' ? 'On' : 'Off') : undefined,
-      variant: garden ? (garden === 'on' ? 'warning' : 'neutral') : 'neutral',
-      icon: <Sun className="h-full w-full" />,
-      onClick: () => void handleAction({ button: 'garden' })
-    });
-    items.push({
-      key: 'porch',
-      title: 'Porch',
-      label: porch ? (porch === 'on' ? 'On' : 'Off') : undefined,
-      variant: porch ? (porch === 'on' ? 'warning' : 'neutral') : 'neutral',
-      icon: <Lightbulb className="h-full w-full" />,
-      onClick: () => void handleAction({ button: 'porch' })
-    });
-    items.push({
-      key: 'backyard',
-      title: 'Backyard',
-      label: backyard ? (backyard === 'on' ? 'On' : 'Off') : undefined,
-      variant: backyard ? (backyard === 'on' ? 'warning' : 'neutral') : 'neutral',
-      icon: <Trees className="h-full w-full" />,
-      onClick: () => void handleAction({ button: 'backyard' })
-    });
+    if (state.page === 'home') {
+      // Action tiles
+      items.push({
+        key: 'lock',
+        isAction: true,
+        title: 'Leave & Lock',
+        label: 'Tap to lock',
+        variant: lockStatus ? (lockStatus === 'open' ? 'danger' : 'ok') : 'neutral',
+        icon: (
+          <span className="relative block h-full w-full" aria-hidden="true">
+            <Home className="h-full w-full" />
+            <Lock className="absolute -bottom-1 -right-1 h-[50%] w-[50%]" />
+          </span>
+        ),
+        onClick: () => void handleAction({ button: 'lock' })
+      });
+      items.push({
+        key: 'alarm',
+        isAction: true,
+        title: 'Alarm',
+        label: alarm ? (alarm === 'armed' ? 'Enabled' : 'Disabled') : undefined,
+        variant: alarm ? (alarm === 'armed' ? 'danger' : 'neutral') : 'neutral',
+        icon: alarm && alarm === 'armed' ? <Shield className="h-full w-full" /> : <ShieldOff className="h-full w-full" />,
+        onClick: () => void handleAction({ button: 'alarm' })
+      });
+      // Link tiles to subpages (dummy icons for now)
+      items.push({
+        key: 'nav:garden',
+        isAction: false,
+        title: 'Garden',
+        variant: 'neutral',
+        icon: <Trees className="h-full w-full" />,
+        onClick: () => navigate('garden')
+      });
+      items.push({
+        key: 'nav:ground',
+        isAction: false,
+        title: 'Ground',
+        variant: 'neutral',
+        icon: <Lightbulb className="h-full w-full" />,
+        onClick: () => navigate('ground')
+      });
+      items.push({
+        key: "nav:pati's",
+        isAction: false,
+        title: "Pati's",
+        variant: 'neutral',
+        icon: <Lightbulb className="h-full w-full" />,
+        onClick: () => navigate("pati's")
+      });
+      items.push({
+        key: "nav:pablo's",
+        isAction: false,
+        title: "Pablo's",
+        variant: 'neutral',
+        icon: <Lightbulb className="h-full w-full" />,
+        onClick: () => navigate("pablo's")
+      });
+      items.push({
+        key: "nav:lara's",
+        isAction: false,
+        title: "Lara's",
+        variant: 'neutral',
+        icon: <Lightbulb className="h-full w-full" />,
+        onClick: () => navigate("lara's")
+      });
+      items.push({
+        key: 'nav:master',
+        isAction: false,
+        title: 'Master',
+        variant: 'neutral',
+        icon: <Lightbulb className="h-full w-full" />,
+        onClick: () => navigate('master')
+      });
+    } else if (state.page === 'garden') {
+      // Driveway
+      items.push({
+        key: 'driveway',
+        isAction: true,
+        title: 'Driveway',
+        label: driveway ? (driveway === 'open' ? 'Open' : 'Closed') : undefined,
+        variant: driveway ? (driveway === 'open' ? 'danger' : 'ok') : 'neutral',
+        icon: <Car className="h-full w-full" />,
+        onClick: () => void handleAction({ button: 'driveway' })
+      });
+      // Garage
+      items.push({
+        key: 'garage',
+        isAction: true,
+        title: 'Garage',
+        label: garage ? (garage === 'open' ? 'Open' : 'Closed') : undefined,
+        variant: garage ? (garage === 'open' ? 'danger' : 'ok') : 'neutral',
+        icon: garage && garage === 'open' ? <DoorOpen className="h-full w-full" /> : <DoorClosed className="h-full w-full" />,
+        onClick: () => void handleAction({ button: 'garage' })
+      });
+      // Pool
+      items.push({
+        key: 'pool',
+        isAction: true,
+        title: 'Pool',
+        label: pool ? (pool === 'on' ? 'On' : 'Off') : undefined,
+        variant: pool ? (pool === 'on' ? 'warning' : 'neutral') : 'neutral',
+        icon: <Waves className="h-full w-full" />,
+        onClick: () => void handleAction({ button: 'pool' })
+      });
+      // Garden
+      items.push({
+        key: 'garden',
+        isAction: true,
+        title: 'Garden',
+        label: garden ? (garden === 'on' ? 'On' : 'Off') : undefined,
+        variant: garden ? (garden === 'on' ? 'warning' : 'neutral') : 'neutral',
+        icon: <Sun className="h-full w-full" />,
+        onClick: () => void handleAction({ button: 'garden' })
+      });
+      // Porch
+      items.push({
+        key: 'porch',
+        isAction: true,
+        title: 'Porch',
+        label: porch ? (porch === 'on' ? 'On' : 'Off') : undefined,
+        variant: porch ? (porch === 'on' ? 'warning' : 'neutral') : 'neutral',
+        icon: <Lightbulb className="h-full w-full" />,
+        onClick: () => void handleAction({ button: 'porch' })
+      });
+      // Backyard
+      items.push({
+        key: 'backyard',
+        isAction: true,
+        title: 'Backyard',
+        label: backyard ? (backyard === 'on' ? 'On' : 'Off') : undefined,
+        variant: backyard ? (backyard === 'on' ? 'warning' : 'neutral') : 'neutral',
+        icon: <Trees className="h-full w-full" />,
+        onClick: () => void handleAction({ button: 'backyard' })
+      });
+    } else {
+      // Other subpages (placeholders for now)
+      items.push({
+        key: 'placeholder-1',
+        isAction: false,
+        title: 'Coming soon',
+        variant: 'neutral',
+        icon: <Lightbulb className="h-full w-full" />,
+        onClick: () => {}
+      });
+    }
 
     return items;
-  }, [alarm, garage, driveway, pool, garden, porch, backyard, lockStatus, handleAction]);
+  }, [alarm, garage, driveway, pool, garden, porch, backyard, lockStatus, handleAction, state.page, dispatch]);
 
   return (
     <div className="min-h-full">
-      <TopBar onRefresh={load} refreshing={state.loading} />
+      <TopBar
+        onRefresh={load}
+        refreshing={state.loading}
+        pageName={state.page !== 'home' ? (state.page.charAt(0).toUpperCase() + state.page.slice(1)) : undefined}
+        onHomeClick={state.page !== 'home' ? () => {
+          dispatch({ type: 'NAVIGATE', page: 'home' });
+          location.replace(location.pathname);
+        } : undefined}
+      />
 
       <main className="mx-auto max-w-md px-4 py-4">
         {/* Auth gate */}
@@ -386,8 +481,8 @@ export function App() {
                 variant={t.variant}
                 icon={t.icon}
                 onClick={t.onClick}
-                sending={state.sending[t.key]}
-                disabled={state.sending[t.key] || state.loading || state.unauthenticated}
+                sending={t.isAction ? state.sending[t.key as Targets] : false}
+                disabled={(t.isAction ? state.sending[t.key as Targets] : false) || state.loading || state.unauthenticated}
                 ariaLabel={`${t.title} control`}
               />
             ))}
