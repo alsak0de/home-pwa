@@ -3,7 +3,7 @@ import { ControlTile } from './components/ControlTile';
 import { TopBar } from './components/TopBar';
 import { ApiError, getStatus, postAction } from './api/api';
 import type { ActionRequest, StatusResponse, Targets } from './types';
-import { Car, DoorClosed, DoorOpen, Shield, ShieldOff, Lightbulb, Sun, Waves, Trees, Lock } from 'lucide-react';
+import { Car, DoorClosed, DoorOpen, Shield, ShieldOff, Lightbulb, Sun, Waves, Trees, Lock, Home } from 'lucide-react';
 import { DEBUG_ENABLED, debugLog } from './utils/debug';
 
 type AppState = {
