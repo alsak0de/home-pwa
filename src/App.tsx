@@ -233,6 +233,7 @@ export function App() {
   const garden = state.status?.garden; // 'on' | 'off'
   const porch = state.status?.porch; // 'on' | 'off'
   const backyard = state.status?.backyard; // 'on' | 'off'
+  const lockStatus = state.status?.lock; // 'open' | 'closed'
 
   const tiles = useMemo(() => {
     const items: Array<{
@@ -249,7 +250,8 @@ export function App() {
       key: 'lock',
       title: 'Leave & Lock',
       label: 'Tap to lock',
-      variant: 'neutral',
+      // Red when open, green when closed, grey when unknown
+      variant: lockStatus ? (lockStatus === 'open' ? 'danger' : 'ok') : 'neutral',
       icon: (
         <span className="relative block h-full w-full" aria-hidden="true">
           <Home className="h-full w-full" />
@@ -336,7 +338,7 @@ export function App() {
     });
 
     return items;
-  }, [alarm, garage, driveway, pool, garden, porch, backyard, handleAction]);
+  }, [alarm, garage, driveway, pool, garden, porch, backyard, lockStatus, handleAction]);
 
   return (
     <div className="min-h-full">
