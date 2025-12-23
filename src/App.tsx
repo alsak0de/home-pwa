@@ -3,7 +3,7 @@ import { ControlTile } from './components/ControlTile';
 import { TopBar } from './components/TopBar';
 import { ApiError, getStatus, postAction } from './api/api';
 import type { ActionRequest, StatusResponse, Targets } from './types';
-import { Car, DoorClosed, DoorOpen, Shield, ShieldOff, Lightbulb, Sun, Waves, Trees, Lock, Home, ChevronUp, ChevronDown, Square, ChevronsUpDown } from 'lucide-react';
+import { Car, DoorClosed, DoorOpen, Shield, ShieldOff, Lightbulb, Sun, Waves, Trees, Lock, Home, ChevronUp, ChevronDown, Square, ChevronsUpDown, Fan } from 'lucide-react';
 import { DEBUG_ENABLED, debugLog } from './utils/debug';
 
 type AppState = {
@@ -517,6 +517,126 @@ export function App() {
                       >
                         <ChevronDown className="h-5 w-5" />
                         <span className="hidden sm:inline">Down</span>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : state.page === "pati's" ? (
+            <div className="grid grid-cols-2 gap-3 sm:gap-4 mt-4">
+              {[
+                { id: 'patis-main', name: "Pati's Shutter" }
+              ].map((sh) => (
+                <div key={sh.id} className="tile w-full bg-slate-600 text-white dark:bg-slate-600 shadow-md" aria-label={`${sh.name} shutters`}>
+                  <div className="flex flex-col items-center justify-center gap-2 h-28 sm:h-32">
+                    <div className="text-lg font-semibold">{sh.name}</div>
+                    <div className="flex items-center gap-2">
+                      <button className="btn btn-ghost text-white" onClick={() => void handleAction({ button: `shutter:${sh.id}:up` as unknown as Targets })} aria-label={`${sh.name} up`} disabled={state.loading || state.unauthenticated}>
+                        <ChevronUp className="h-5 w-5" /><span className="hidden sm:inline">Up</span>
+                      </button>
+                      <button className="btn btn-ghost text-white" onClick={() => void handleAction({ button: `shutter:${sh.id}:stop` as unknown as Targets })} aria-label={`${sh.name} stop`} disabled={state.loading || state.unauthenticated}>
+                        <Square className="h-5 w-5" /><span className="hidden sm:inline">Stop</span>
+                      </button>
+                      <button className="btn btn-ghost text-white" onClick={() => void handleAction({ button: `shutter:${sh.id}:down` as unknown as Targets })} aria-label={`${sh.name} down`} disabled={state.loading || state.unauthenticated}>
+                        <ChevronDown className="h-5 w-5" /><span className="hidden sm:inline">Down</span>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              ))}
+              {/* AC on/off */}
+              <div className="tile w-full bg-slate-600 text-white dark:bg-slate-600 shadow-md" aria-label="Pati's AC control">
+                <div className="flex flex-col items-center justify-center gap-2 h-28 sm:h-32">
+                  <div className="text-lg font-semibold">Pati&apos;s AC</div>
+                  <div className="flex items-center gap-2">
+                    <button className="btn btn-ghost text-white" onClick={() => void handleAction({ button: 'ac:patis:on' as unknown as Targets })} aria-label="Pati's AC on" disabled={state.loading || state.unauthenticated}>
+                      <Fan className="h-5 w-5" /><span className="hidden sm:inline">On</span>
+                    </button>
+                    <button className="btn btn-ghost text-white" onClick={() => void handleAction({ button: 'ac:patis:off' as unknown as Targets })} aria-label="Pati's AC off" disabled={state.loading || state.unauthenticated}>
+                      <Square className="h-5 w-5" /><span className="hidden sm:inline">Off</span>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          ) : state.page === "lara's" ? (
+            <div className="grid grid-cols-2 gap-3 sm:gap-4 mt-4">
+              {[
+                { id: 'laras-main', name: "Lara's Shutter" }
+              ].map((sh) => (
+                <div key={sh.id} className="tile w-full bg-slate-600 text-white dark:bg-slate-600 shadow-md" aria-label={`${sh.name} shutters`}>
+                  <div className="flex flex-col items-center justify-center gap-2 h-28 sm:h-32">
+                    <div className="text-lg font-semibold">{sh.name}</div>
+                    <div className="flex items-center gap-2">
+                      <button className="btn btn-ghost text-white" onClick={() => void handleAction({ button: `shutter:${sh.id}:up` as unknown as Targets })} aria-label={`${sh.name} up`} disabled={state.loading || state.unauthenticated}>
+                        <ChevronUp className="h-5 w-5" /><span className="hidden sm:inline">Up</span>
+                      </button>
+                      <button className="btn btn-ghost text-white" onClick={() => void handleAction({ button: `shutter:${sh.id}:stop` as unknown as Targets })} aria-label={`${sh.name} stop`} disabled={state.loading || state.unauthenticated}>
+                        <Square className="h-5 w-5" /><span className="hidden sm:inline">Stop</span>
+                      </button>
+                      <button className="btn btn-ghost text-white" onClick={() => void handleAction({ button: `shutter:${sh.id}:down` as unknown as Targets })} aria-label={`${sh.name} down`} disabled={state.loading || state.unauthenticated}>
+                        <ChevronDown className="h-5 w-5" /><span className="hidden sm:inline">Down</span>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              ))}
+              {/* AC on/off */}
+              <div className="tile w-full bg-slate-600 text-white dark:bg-slate-600 shadow-md" aria-label="Lara's AC control">
+                <div className="flex flex-col items-center justify-center gap-2 h-28 sm:h-32">
+                  <div className="text-lg font-semibold">Lara&apos;s AC</div>
+                  <div className="flex items-center gap-2">
+                    <button className="btn btn-ghost text-white" onClick={() => void handleAction({ button: 'ac:laras:on' as unknown as Targets })} aria-label="Lara's AC on" disabled={state.loading || state.unauthenticated}>
+                      <Fan className="h-5 w-5" /><span className="hidden sm:inline">On</span>
+                    </button>
+                    <button className="btn btn-ghost text-white" onClick={() => void handleAction({ button: 'ac:laras:off' as unknown as Targets })} aria-label="Lara's AC off" disabled={state.loading || state.unauthenticated}>
+                      <Square className="h-5 w-5" /><span className="hidden sm:inline">Off</span>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          ) : state.page === "pablo's" ? (
+            <div className="grid grid-cols-2 gap-3 sm:gap-4 mt-4">
+              {[
+                { id: 'pablos-main', name: "Pablo's Shutter" }
+              ].map((sh) => (
+                <div key={sh.id} className="tile w-full bg-slate-600 text-white dark:bg-slate-600 shadow-md" aria-label={`${sh.name} shutters`}>
+                  <div className="flex flex-col items-center justify-center gap-2 h-28 sm:h-32">
+                    <div className="text-lg font-semibold">{sh.name}</div>
+                    <div className="flex items-center gap-2">
+                      <button className="btn btn-ghost text-white" onClick={() => void handleAction({ button: `shutter:${sh.id}:up` as unknown as Targets })} aria-label={`${sh.name} up`} disabled={state.loading || state.unauthenticated}>
+                        <ChevronUp className="h-5 w-5" /><span className="hidden sm:inline">Up</span>
+                      </button>
+                      <button className="btn btn-ghost text-white" onClick={() => void handleAction({ button: `shutter:${sh.id}:stop` as unknown as Targets })} aria-label={`${sh.name} stop`} disabled={state.loading || state.unauthenticated}>
+                        <Square className="h-5 w-5" /><span className="hidden sm:inline">Stop</span>
+                      </button>
+                      <button className="btn btn-ghost text-white" onClick={() => void handleAction({ button: `shutter:${sh.id}:down` as unknown as Targets })} aria-label={`${sh.name} down`} disabled={state.loading || state.unauthenticated}>
+                        <ChevronDown className="h-5 w-5" /><span className="hidden sm:inline">Down</span>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : state.page === 'master' ? (
+            <div className="grid grid-cols-2 gap-3 sm:gap-4 mt-4">
+              {[
+                { id: 'master-main', name: 'Master Shutter' }
+              ].map((sh) => (
+                <div key={sh.id} className="tile w-full bg-slate-600 text-white dark:bg-slate-600 shadow-md" aria-label={`${sh.name} shutters`}>
+                  <div className="flex flex-col items-center justify-center gap-2 h-28 sm:h-32">
+                    <div className="text-lg font-semibold">{sh.name}</div>
+                    <div className="flex items-center gap-2">
+                      <button className="btn btn-ghost text-white" onClick={() => void handleAction({ button: `shutter:${sh.id}:up` as unknown as Targets })} aria-label={`${sh.name} up`} disabled={state.loading || state.unauthenticated}>
+                        <ChevronUp className="h-5 w-5" /><span className="hidden sm:inline">Up</span>
+                      </button>
+                      <button className="btn btn-ghost text-white" onClick={() => void handleAction({ button: `shutter:${sh.id}:stop` as unknown as Targets })} aria-label={`${sh.name} stop`} disabled={state.loading || state.unauthenticated}>
+                        <Square className="h-5 w-5" /><span className="hidden sm:inline">Stop</span>
+                      </button>
+                      <button className="btn btn-ghost text-white" onClick={() => void handleAction({ button: `shutter:${sh.id}:down` as unknown as Targets })} aria-label={`${sh.name} down`} disabled={state.loading || state.unauthenticated}>
+                        <ChevronDown className="h-5 w-5" /><span className="hidden sm:inline">Down</span>
                       </button>
                     </div>
                   </div>
