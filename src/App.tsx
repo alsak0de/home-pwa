@@ -321,9 +321,13 @@ export function App() {
         key: 'nav:garden',
         isAction: false,
         title: 'Garden',
-        variant: 'neutral',
+        variant: (driveway === 'open' || garage === 'open') ? 'danger' : 'neutral',
         icon: <Trees className="h-full w-full" />,
         style: (() => {
+          if (driveway === 'open' || garage === 'open') {
+            // Access open → force red, ignore gradient
+            return undefined;
+          }
           const total = 4;
           const numOn =
             (pool === 'on' ? 1 : 0) +
