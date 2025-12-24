@@ -257,6 +257,18 @@ export function App() {
   const backyard = state.status?.backyard; // 'on' | 'off'
   const lockStatus = state.status?.lock; // 'open' | 'closed'
   const xmas = (state.status as any)?.xmas as ('on' | 'off' | undefined); // optional
+  // AC units status may be provided as "on|off:tempC" strings
+  const acPatisRaw = (state.status as any)?.["patis:ac"] as (string | undefined);
+  const acLarasRaw = (state.status as any)?.["laras:ac"] as (string | undefined);
+  const parseAc = (raw?: string): { mode?: 'on' | 'off'; tempC?: number } => {
+    if (!raw || typeof raw !== 'string') return {};
+    const [mode, temp] = raw.split(':');
+    const m = mode === 'on' || mode === 'off' ? mode : undefined;
+    const t = temp !== undefined ? Number(temp) : undefined;
+    return { mode: m, tempC: Number.isFinite(t) ? t : undefined };
+  };
+  const acPatis = parseAc(acPatisRaw);
+  const acLaras = parseAc(acLarasRaw);
 
   const tiles = useMemo(() => {
     const items: Array<{
@@ -570,10 +582,24 @@ export function App() {
                   </div>
                 </div>
               ))}
-              {/* AC on/off */}
-              <div className="tile w-full bg-slate-500 text-white dark:bg-slate-500 shadow-md" aria-label="Pati's AC control">
+              {/* AC on/off with status and temperature */}
+              <div
+                className="tile w-full text-white shadow-md"
+                aria-label="Pati's AC control"
+                style={{
+                  backgroundColor:
+                    acPatis.mode === 'on'
+                      ? '#0284c7' /* sky-600 */
+                      : acPatis.mode === 'off'
+                      ? '#475569' /* slate-600 */
+                      : '#64748b' /* slate-500 unknown */
+                }}
+              >
                 <div className="flex flex-col items-center justify-center gap-2 h-28 sm:h-32">
                   <div className="text-lg font-semibold">Pati&apos;s AC</div>
+                  {acPatis.tempC !== undefined ? (
+                    <div className="text-sm/5 opacity-90">{acPatis.tempC}ºC</div>
+                  ) : null}
                   <div className="flex items-center gap-2">
                     <button className="btn btn-ghost text-white" onClick={() => void handleAction({ button: 'ac:patis:on' as unknown as Targets })} aria-label="Pati's AC on" disabled={state.loading || state.unauthenticated}>
                       <Fan className="h-5 w-5" /><span className="hidden sm:inline">On</span>
@@ -607,10 +633,24 @@ export function App() {
                   </div>
                 </div>
               ))}
-              {/* AC on/off */}
-              <div className="tile w-full bg-slate-500 text-white dark:bg-slate-500 shadow-md" aria-label="Lara's AC control">
+              {/* AC on/off with status and temperature */}
+              <div
+                className="tile w-full text-white shadow-md"
+                aria-label="Lara's AC control"
+                style={{
+                  backgroundColor:
+                    acLaras.mode === 'on'
+                      ? '#0284c7' /* sky-600 */
+                      : acLaras.mode === 'off'
+                      ? '#475569' /* slate-600 */
+                      : '#64748b' /* slate-500 unknown */
+                }}
+              >
                 <div className="flex flex-col items-center justify-center gap-2 h-28 sm:h-32">
                   <div className="text-lg font-semibold">Lara&apos;s AC</div>
+                  {acLaras.tempC !== undefined ? (
+                    <div className="text-sm/5 opacity-90">{acLaras.tempC}ºC</div>
+                  ) : null}
                   <div className="flex items-center gap-2">
                     <button className="btn btn-ghost text-white" onClick={() => void handleAction({ button: 'ac:laras:on' as unknown as Targets })} aria-label="Lara's AC on" disabled={state.loading || state.unauthenticated}>
                       <Fan className="h-5 w-5" /><span className="hidden sm:inline">On</span>
