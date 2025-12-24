@@ -3,7 +3,7 @@ import { ControlTile } from './components/ControlTile';
 import { TopBar } from './components/TopBar';
 import { ApiError, getStatus, postAction } from './api/api';
 import type { ActionRequest, StatusResponse, Targets } from './types';
-import { Car, DoorClosed, DoorOpen, Shield, ShieldOff, Lightbulb, Sun, Waves, Trees, Lock, Home, ChevronUp, ChevronDown, Square, ChevronsUpDown, Fan } from 'lucide-react';
+import { Car, DoorClosed, DoorOpen, Shield, ShieldOff, Lightbulb, Sun, Waves, Trees, Lock, Home, ChevronUp, ChevronDown, Square, ChevronsUpDown, Fan, TreePine } from 'lucide-react';
 import { DEBUG_ENABLED, debugLog } from './utils/debug';
 
 type AppState = {
@@ -256,6 +256,7 @@ export function App() {
   const porch = state.status?.porch; // 'on' | 'off'
   const backyard = state.status?.backyard; // 'on' | 'off'
   const lockStatus = state.status?.lock; // 'open' | 'closed'
+  const xmas = (state.status as any)?.xmas as ('on' | 'off' | undefined); // optional
 
   const tiles = useMemo(() => {
     const items: Array<{
@@ -392,7 +393,7 @@ export function App() {
         isAction: true,
         title: 'Pool',
         label: pool ? (pool === 'on' ? 'On' : 'Off') : undefined,
-        variant: pool ? (pool === 'on' ? 'warning' : 'neutral') : 'neutral',
+        variant: pool ? (pool === 'on' ? 'warning' : 'neutral') : 'unknown',
         icon: <Waves className="h-full w-full" />,
         onClick: () => void handleAction({ button: 'pool' })
       });
@@ -402,7 +403,7 @@ export function App() {
         isAction: true,
         title: 'Garden',
         label: garden ? (garden === 'on' ? 'On' : 'Off') : undefined,
-        variant: garden ? (garden === 'on' ? 'warning' : 'neutral') : 'neutral',
+        variant: garden ? (garden === 'on' ? 'warning' : 'neutral') : 'unknown',
         icon: <Sun className="h-full w-full" />,
         onClick: () => void handleAction({ button: 'garden' })
       });
@@ -412,7 +413,7 @@ export function App() {
         isAction: true,
         title: 'Porch',
         label: porch ? (porch === 'on' ? 'On' : 'Off') : undefined,
-        variant: porch ? (porch === 'on' ? 'warning' : 'neutral') : 'neutral',
+        variant: porch ? (porch === 'on' ? 'warning' : 'neutral') : 'unknown',
         icon: <Lightbulb className="h-full w-full" />,
         onClick: () => void handleAction({ button: 'porch' })
       });
@@ -422,7 +423,7 @@ export function App() {
         isAction: true,
         title: 'Backyard',
         label: backyard ? (backyard === 'on' ? 'On' : 'Off') : undefined,
-        variant: backyard ? (backyard === 'on' ? 'warning' : 'neutral') : 'neutral',
+        variant: backyard ? (backyard === 'on' ? 'warning' : 'neutral') : 'unknown',
         icon: <Trees className="h-full w-full" />,
         onClick: () => void handleAction({ button: 'backyard' })
       });
@@ -536,6 +537,16 @@ export function App() {
                   </div>
                 </div>
               ))}
+              {/* Xmas tile */}
+              <ControlTile
+                key="xmas"
+                title="Xmas"
+                label={xmas ? (xmas === 'on' ? 'On' : 'Off') : undefined}
+                variant={xmas ? (xmas === 'on' ? 'warning' : 'neutral') : 'unknown'}
+                icon={<TreePine className="h-full w-full" />}
+                onClick={() => void handleAction({ button: 'xmas' as unknown as Targets })}
+                ariaLabel="Xmas lights"
+              />
             </div>
           ) : state.page === "pati's" ? (
             <div className="grid grid-cols-2 gap-3 sm:gap-4 mt-4">
@@ -560,7 +571,7 @@ export function App() {
                 </div>
               ))}
               {/* AC on/off */}
-              <div className="tile w-full bg-slate-600 text-white dark:bg-slate-600 shadow-md" aria-label="Pati's AC control">
+              <div className="tile w-full bg-slate-500 text-white dark:bg-slate-500 shadow-md" aria-label="Pati's AC control">
                 <div className="flex flex-col items-center justify-center gap-2 h-28 sm:h-32">
                   <div className="text-lg font-semibold">Pati&apos;s AC</div>
                   <div className="flex items-center gap-2">
@@ -597,7 +608,7 @@ export function App() {
                 </div>
               ))}
               {/* AC on/off */}
-              <div className="tile w-full bg-slate-600 text-white dark:bg-slate-600 shadow-md" aria-label="Lara's AC control">
+              <div className="tile w-full bg-slate-500 text-white dark:bg-slate-500 shadow-md" aria-label="Lara's AC control">
                 <div className="flex flex-col items-center justify-center gap-2 h-28 sm:h-32">
                   <div className="text-lg font-semibold">Lara&apos;s AC</div>
                   <div className="flex items-center gap-2">

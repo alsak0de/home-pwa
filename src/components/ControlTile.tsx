@@ -1,6 +1,6 @@
 import { type ReactNode } from 'react';
 
-type Variant = 'ok' | 'warning' | 'danger' | 'neutral';
+type Variant = 'ok' | 'warning' | 'danger' | 'neutral' | 'unknown';
 
 export type ControlTileProps = {
   title: string;
@@ -18,7 +18,9 @@ const variantClasses: Record<Variant, string> = {
   ok: 'bg-emerald-600 text-white dark:bg-emerald-600',
   warning: 'bg-amber-600 text-white dark:bg-amber-600',
   danger: 'bg-rose-600 text-white dark:bg-rose-600',
-  neutral: 'bg-slate-600 text-white dark:bg-slate-600'
+  neutral: 'bg-slate-600 text-white dark:bg-slate-600',
+  // Unknown status is lighter grey than "off"
+  unknown: 'bg-slate-500 text-white dark:bg-slate-500'
 };
 
 export function ControlTile({
